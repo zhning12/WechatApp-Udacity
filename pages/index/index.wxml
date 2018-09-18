@@ -1,0 +1,5 @@
+<view class='wrapper'>
+  <image class='background-img' src='/images/sunny-bg.png' mode='scaleToFill'></image>
+  <view class="temperature">12°</view>
+  <view class='description'>晴天</view>
+</view>
