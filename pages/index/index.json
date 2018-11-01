@@ -1,6 +1,6 @@
 {
 	"navigationBarTitleText": "天气小程序",
-	"navigationBarBackgroundColor": "#cbeefd",
+	"navigationBarBackgroundColor": "#fff",
 	"navigationBarTextStyle": "white",
 	"enablePullDownRefresh": true
 }
