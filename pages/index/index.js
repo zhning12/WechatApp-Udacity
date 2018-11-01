@@ -21,7 +21,7 @@ Page({
     nowTemp: '',
     nowWeather: '',
     nowWeatherBackground: '',
-    forecast: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    hourlyWeather: []
   },
   getNow(callback) {
     wx.request({
@@ -32,27 +32,8 @@ Page({
       success: res => {
         console.log(res.data.result);
         let result = res.data.result;
-        let weather = result.now.weather;
-        let temp = result.now.temp;
-        console.log(temp, weather);
-        let forecast = result.forecast;
-        let nowHour = new Date().getHours();
-        for (let i = 0; i < forecast.length; i++) {
-          forecast[i].temp += '°';
-          forecast[i].iconPath = `/images/${forecast[i].weather}-icon.png`;
-          forecast[i].time = i + nowHour % 24 + '时';
-        }
-        this.setData({
-          nowTemp: temp + '°',
-          nowWeather: weatherMap[weather],
-          nowWeatherBackground: `/images/${weather}-bg.png`,
-          forecast: forecast
-        });
-
-        wx.setNavigationBarColor({
-          frontColor: '#000000',
-          backgroundColor: weatherColorMap[weather],
-        });
+				this.setWeather(result);
+				this.setHourlyWeather(result);
       },
       complete: () => {
         callback && callback();
@@ -66,6 +47,36 @@ Page({
   onPullDownRefresh() {
     this.getNow(() => {
       wx.stopPullDownRefresh();
+    })
+  },
+  setWeather(result) {
+    let weather = result.now.weather;
+    let temp = result.now.temp;
+    this.setData({
+      nowTemp: temp + '°',
+      nowWeather: weatherMap[weather],
+      nowWeatherBackground: `/images/${weather}-bg.png`,
+    });
+
+    wx.setNavigationBarColor({
+      frontColor: '#000000',
+      backgroundColor: weatherColorMap[weather],
+    });
+  },
+  setHourlyWeather(result) {
+		let forecast = result.forecast;
+		let hourlyWeather = [];
+		let nowHour = new Date().getHours();
+		for (let i = 0; i < forecast.length; i++) {
+			hourlyWeather.push({
+				time: (3 * i + nowHour) % 24 + '时',
+				temp: forecast[i].temp + '°',
+				iconPath: `/images/${forecast[i].weather}-icon.png`
+			});
+		}
+		hourlyWeather[0].time = '现在';
+    this.setData({
+      hourlyWeather: hourlyWeather
     })
   }
 })
