@@ -21,7 +21,9 @@ Page({
     nowTemp: '',
     nowWeather: '',
     nowWeatherBackground: '',
-    hourlyWeather: []
+    hourlyWeather: [],
+		todayDate:'',
+		todayTemp:'',
   },
   getNow(callback) {
     wx.request({
@@ -34,6 +36,7 @@ Page({
         let result = res.data.result;
 				this.setWeather(result);
 				this.setHourlyWeather(result);
+				this.setToday(result);
       },
       complete: () => {
         callback && callback();
@@ -78,5 +81,17 @@ Page({
     this.setData({
       hourlyWeather: hourlyWeather
     })
-  }
+  },
+	setToday(result){
+		let date = new Date();
+		this.setData({
+			todayTemp: `${result.today.minTemp}° - ${result.today.maxTemp}°`,
+			todayDate:`${date.getFullYear()} - ${date.getMonth()+1} - ${date.getDate()} 今天`
+		})
+	},
+	onTapDayWeather(){
+		wx.navigateTo({
+			url: '/pages/list/list',
+		})
+	}
 })
