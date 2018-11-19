@@ -16,27 +16,31 @@ const weatherColorMap = {
   'snow': '#aae1fc'
 }
 
+const QQMapWX = require('../../libs/qqmap-wx-jssdk.min.js');
+
 Page({
   data: {
     nowTemp: '',
     nowWeather: '',
     nowWeatherBackground: '',
     hourlyWeather: [],
-		todayDate:'',
-		todayTemp:'',
+    todayDate: '',
+    todayTemp: '',
+    city:'广州市',
+    locationTipsText:'点击获取当前位置'
   },
   getNow(callback) {
     wx.request({
       url: 'https://test-miniprogram.com/api/weather/now',
       data: {
-        city: '广州市'
+        city: this.data.city
       },
       success: res => {
         console.log(res.data.result);
         let result = res.data.result;
-				this.setWeather(result);
-				this.setHourlyWeather(result);
-				this.setToday(result);
+        this.setWeather(result);
+        this.setHourlyWeather(result);
+        this.setToday(result);
       },
       complete: () => {
         callback && callback();
@@ -44,6 +48,9 @@ Page({
     })
   },
   onLoad() {
+    this.qqmapsdk = new QQMapWX({
+      key: 'IJKBZ-AK6KU-VRXVS-BDMN7-IE4O3-MKBH6'
+    })
     this.getNow();
   },
 
@@ -67,38 +74,54 @@ Page({
     });
   },
   setHourlyWeather(result) {
-		let forecast = result.forecast;
-		let hourlyWeather = [];
-		let nowHour = new Date().getHours();
-		for (let i = 0; i < forecast.length; i++) {
-			hourlyWeather.push({
-				time: (3 * i + nowHour) % 24 + '时',
-				temp: forecast[i].temp + '°',
-				iconPath: `/images/${forecast[i].weather}-icon.png`
-			});
-		}
-		hourlyWeather[0].time = '现在';
+    let forecast = result.forecast;
+    let hourlyWeather = [];
+    let nowHour = new Date().getHours();
+    for (let i = 0; i < forecast.length; i++) {
+      hourlyWeather.push({
+        time: (3 * i + nowHour) % 24 + '时',
+        temp: forecast[i].temp + '°',
+        iconPath: `/images/${forecast[i].weather}-icon.png`
+      });
+    }
+    hourlyWeather[0].time = '现在';
     this.setData({
       hourlyWeather: hourlyWeather
     })
   },
-	setToday(result){
-		let date = new Date();
-		this.setData({
-			todayTemp: `${result.today.minTemp}° - ${result.today.maxTemp}°`,
-			todayDate:`${date.getFullYear()} - ${date.getMonth()+1} - ${date.getDate()} 今天`
-		})
-	},
-	onTapDayWeather(){
-		wx.navigateTo({
-			url: '/pages/list/list',
-		})
-	},
-	onTapLocation(){
-		wx.getLocation({
-			success: res => {
-				console.log(res.latitude,res.longitude)
-			},
-		})
-	}
+  setToday(result) {
+    let date = new Date();
+    this.setData({
+      todayTemp: `${result.today.minTemp}° - ${result.today.maxTemp}°`,
+      todayDate: `${date.getFullYear()} - ${date.getMonth() + 1} - ${date.getDate()} 今天`
+    })
+  },
+  onTapDayWeather() {
+    wx.navigateTo({
+      url: '/pages/list/list?city='+this.data.city,
+    })
+  },
+  onTapLocation() {
+    wx.getLocation({
+      success: res => {
+        console.log(res.latitude, res.longitude);
+        this.qqmapsdk.reverseGeocoder({
+          location: {
+            latitude: res.latitude,
+            longitude: res.longitude
+          },
+          success: res=>{
+            let city = res.result.address_component.city;
+            console.log(city);
+            this.setData({
+              city:city,
+              locationTipsText:""
+            })
+            this.getNow();
+          }
+        })
+      },
+    })
+  }
 })
+
