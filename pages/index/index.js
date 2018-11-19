@@ -18,6 +18,10 @@ const weatherColorMap = {
 
 const QQMapWX = require('../../libs/qqmap-wx-jssdk.min.js');
 
+const UNPROMPTED = 0
+const UNAUTHORIZED = 1
+const AUTHORIZED = 2
+
 Page({
   data: {
     nowTemp: '',
@@ -26,8 +30,8 @@ Page({
     hourlyWeather: [],
     todayDate: '',
     todayTemp: '',
-    city:'广州市',
-    locationTipsText:'点击获取当前位置'
+    city: '广州市',
+    locationAuthType: UNPROMPTED
   },
   getNow(callback) {
     wx.request({
@@ -51,7 +55,21 @@ Page({
     this.qqmapsdk = new QQMapWX({
       key: 'IJKBZ-AK6KU-VRXVS-BDMN7-IE4O3-MKBH6'
     })
-    this.getNow();
+    wx.getSetting({
+      success: res => {
+        let auth = res.authSetting['scope.userLocation']
+        this.setData({
+          locationAuthType: auth ? AUTHORIZED : (auth === false) ? UNAUTHORIZED : UNPROMPTED
+        })
+        if(auth)
+          this.getCityAndWeather();
+        else
+          this.getNow();
+      },
+      fail:()=>{
+        this.getNow();
+      }
+    })
   },
 
   onPullDownRefresh() {
@@ -98,29 +116,48 @@ Page({
   },
   onTapDayWeather() {
     wx.navigateTo({
-      url: '/pages/list/list?city='+this.data.city,
+      url: '/pages/list/list?city=' + this.data.city,
     })
   },
   onTapLocation() {
+    if (this.data.locationAuthType === UNAUTHORIZED)
+      wx.openSetting({
+        success: res => {
+          let auth = res.authSetting['scope.userLocation'];
+          if (auth) {
+            this.getCityAndWeather()
+          }
+        }
+      });
+    else
+      this.getCityAndWeather();
+
+  },
+  getCityAndWeather() {
     wx.getLocation({
       success: res => {
-        console.log(res.latitude, res.longitude);
+        this.setData({
+          locationAuthType: AUTHORIZED
+        })
         this.qqmapsdk.reverseGeocoder({
           location: {
             latitude: res.latitude,
             longitude: res.longitude
           },
-          success: res=>{
+          success: res => {
             let city = res.result.address_component.city;
-            console.log(city);
             this.setData({
-              city:city,
-              locationTipsText:""
+              city: city
             })
             this.getNow();
           }
         })
       },
+      fail: () => {
+        this.setData({
+          locationAuthType: UNAUTHORIZED
+        })
+      }
     })
   }
 })
