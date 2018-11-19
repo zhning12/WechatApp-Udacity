@@ -1,5 +1,38 @@
+/* width 750rpx, height 760rpx
+760 = 20+154+280+56+250 */
+.wrapper {
+  position: relative;
+  padding-top: 20rpx;
+  padding-bottom:250rpx;
+
+}
+
+/* height: 154rpx
+154 = 42 + 10 + 42 + 60 */
+.location-wrapper{
+  margin-bottom: 60rpx;
+  font-size: 30rpx;
+  line-height: 42rpx;
+  color: rgba(0,0,0,0.5)
+}
+
+.location{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.location-icon{
+  margin-right: 10rpx;
+  width: 21rpx;
+  height: 30rpx;
+}
+.location-tips{
+  margin-top:10rpx;
+  text-align: center;
+}
+
 .temperature {
-  padding-top: 200rpx;
   text-align: center;
   font-size: 200rpx;
   /* 行高通常设置为字体的1.4倍，保证上下有空隙 */
@@ -13,12 +46,6 @@
   font-size: 40rpx;
   line-height: 56rpx;
   opacity: 0.65;
-}
-
-.wrapper {
-  position: relative;
-  height: 760rpx;
-  width: 750rpx;
 }
 
 .background-img {
@@ -111,3 +138,4 @@
 	width:13rpx;
 	height: 24rpx;
 }
+

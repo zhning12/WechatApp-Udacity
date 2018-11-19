@@ -93,5 +93,12 @@ Page({
 		wx.navigateTo({
 			url: '/pages/list/list',
 		})
+	},
+	onTapLocation(){
+		wx.getLocation({
+			success: res => {
+				console.log(res.latitude,res.longitude)
+			},
+		})
 	}
 })
